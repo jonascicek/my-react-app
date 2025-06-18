@@ -1,0 +1,36 @@
+# Node.js / React
+node_modules/
+dist/
+.env
+*.log
+npm-debug.log*
+
+# Terraform
+.terraform/
+terraform.tfstate
+terraform.tfstate.*
+crash.log
+*.tfvars
+*.tfplan
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# SSH Keys 
+*.pem
+*.key
+*.pub
+id_rsa
+id_rsa.*
+
+# System-Dateien
+.DS_Store
+Thumbs.db
+
+# GitHub Actions Artifacts
+*.artifact
+
+# IDEs / Editoren
+.vscode/
+.idea/
