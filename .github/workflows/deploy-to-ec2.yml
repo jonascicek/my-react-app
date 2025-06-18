@@ -31,7 +31,13 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
       - uses: hashicorp/setup-terraform@v3
       - run: terraform -chdir=terraform init
-      - run: terraform -chdir=terraform apply -auto-approve && terraform -chdir=terraform output
+      - run: |
+          echo ">>> Terraform Plan Preview:"
+          terraform -chdir=terraform plan
+          echo ">>> Terraform Apply:"
+          terraform -chdir=terraform apply -auto-approve
+          echo ">>> Terraform Output:"
+          terraform -chdir=terraform output
         env:
           TF_VAR_ssh_public_key: ${{ secrets.SSH_PUBLIC_KEY }}
       - id: output
