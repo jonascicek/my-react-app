@@ -1,7 +1,3 @@
-Klar! Hier ist deine `README.md` mit allen Inhalten in **Markdown-Formatierung**:
-
----
-
 ````markdown
 # CI/CD-Pipeline für React + Terraform + AWS EC2 mit GitHub Actions
 
@@ -115,5 +111,3 @@ terraform output -raw ec2_ip
 * `ssh` führt `sudo systemctl restart nginx` aus → App wird sofort neu geladen.
 
 ---
-
-Für den Testpush 3
