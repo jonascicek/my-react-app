@@ -115,3 +115,5 @@ terraform output -raw ec2_ip
 * `ssh` führt `sudo systemctl restart nginx` aus → App wird sofort neu geladen.
 
 ---
+
+Für den Testpush 2
