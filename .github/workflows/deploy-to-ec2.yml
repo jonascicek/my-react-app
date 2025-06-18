@@ -31,7 +31,9 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION }}
       - uses: hashicorp/setup-terraform@v3
       - run: terraform -chdir=terraform init
-      - run: terraform -chdir=terraform apply -auto-approve
+      - run: terraform -chdir=terraform apply -auto-approve && terraform -chdir=terraform output
+        env:
+          TF_VAR_ssh_public_key: ${{ secrets.SSH_PUBLIC_KEY }}
       - id: output
         run: echo "EC2_IP=$(terraform -chdir=terraform output -raw ec2_ip)" >> $GITHUB_ENV
 

@@ -16,3 +16,5 @@ jobs:
       - uses: hashicorp/setup-terraform@v3
       - run: terraform -chdir=terraform init
       - run: terraform -chdir=terraform destroy -auto-approve
+        env:
+          TF_VAR_ssh_public_key: ${{ secrets.SSH_PUBLIC_KEY }}
