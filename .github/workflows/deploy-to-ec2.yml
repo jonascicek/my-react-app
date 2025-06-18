@@ -82,7 +82,7 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Deploy to EC2 via SCP + restart Nginx
+      - name: Deploy to EC2 via SCP and restart Nginx
         run: |
           EC2_IP="${{ needs.infra_provision.outputs.ec2_ip }}"
           echo "Deploying to EC2 at IP: $EC2_IP"
@@ -90,5 +90,7 @@ jobs:
             echo "❌ EC2_IP is empty. Aborting deployment."
             exit 1
           fi
-          scp -o StrictHostKeyChecking=no -r dist/* ubuntu@$EC2_IP:/var/www/html
-          ssh -o StrictHostKeyChecking=no ubuntu@$EC2_IP 'sudo systemctl restart nginx'
+
+          ssh -o StrictHostKeyChecking=no ubuntu@$EC2_IP 'mkdir -p /home/ubuntu/deploy'
+          scp -o StrictHostKeyChecking=no -r dist/* ubuntu@$EC2_IP:/home/ubuntu/deploy/
+          ssh -o StrictHostKeyChecking=no ubuntu@$EC2_IP 'sudo cp -r /home/ubuntu/deploy/* /var/www/html && sudo systemctl restart nginx'
