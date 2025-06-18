@@ -8,13 +8,22 @@ jobs:
   ci_build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
           node-version: '20'
-      - run: npm ci
-      - run: npm run build
-      - uses: actions/upload-artifact@v4
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build React app
+        run: npm run build
+
+      - name: Upload frontend build artifact
+        uses: actions/upload-artifact@v4
         with:
           name: frontend-dist
           path: dist/
@@ -23,32 +32,32 @@ jobs:
     runs-on: ubuntu-latest
     needs: ci_build
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - uses: aws-actions/configure-aws-credentials@v3
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v3
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-      - uses: hashicorp/setup-terraform@v3
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
 
-      - run: echo ">>> Terraform Init"
-      - run: terraform -chdir=terraform init
+      - name: Terraform Init, Plan, Apply, Output
+        run: |
+          echo ">>> Terraform Init"
+          terraform -chdir=terraform init
 
-      - run: |
           echo ">>> Terraform Plan"
           terraform -chdir=terraform plan
 
-      - run: |
           echo ">>> Terraform Apply"
           terraform -chdir=terraform apply -auto-approve
 
-      - name: Save EC2 IP output
-        id: get_ip
-        run: |
           echo ">>> Terraform Output"
-          export EC2_IP=$(terraform -chdir=terraform output -raw ec2_ip)
+          EC2_IP=$(terraform -chdir=terraform output -raw ec2_ip)
           echo "EC2_IP=$EC2_IP" >> $GITHUB_ENV
           echo "::notice title=EC2_IP::$EC2_IP"
         env:
@@ -60,22 +69,25 @@ jobs:
     runs-on: ubuntu-latest
     needs: infra_provision
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - uses: actions/download-artifact@v4
+      - name: Download frontend artifact
+        uses: actions/download-artifact@v4
         with:
           name: frontend-dist
           path: dist/
 
-      - uses: webfactory/ssh-agent@v0.9.0
+      - name: Setup SSH Agent
+        uses: webfactory/ssh-agent@v0.9.0
         with:
           ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      - name: Deploy to EC2
+      - name: Deploy to EC2 via SCP + restart Nginx
         run: |
           echo "Deploying to EC2 at IP: $EC2_IP"
           if [ -z "$EC2_IP" ]; then
-            echo "❌ Fehler: EC2_IP ist leer. Deployment wird abgebrochen."
+            echo "❌ EC2_IP is empty. Aborting deployment."
             exit 1
           fi
           scp -o StrictHostKeyChecking=no -r dist/* ubuntu@$EC2_IP:/var/www/html
