@@ -40,6 +40,7 @@ jobs:
           terraform -chdir=terraform output
         env:
           TF_VAR_ssh_public_key: ${{ secrets.SSH_PUBLIC_KEY }}
+          TF_VAR_aws_region: ${{ secrets.AWS_REGION }}
       - id: output
         run: echo "EC2_IP=$(terraform -chdir=terraform output -raw ec2_ip)" >> $GITHUB_ENV
 
